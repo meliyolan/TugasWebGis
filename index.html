@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGIS Hotel Kabupaten Bandung</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: Arial, sans-serif; margin:0; padding:0; }
+
+    /* Navbar */
+    nav ul {
+      display:flex; justify-content:center; list-style:none;
+      padding:10px 0; margin:0; background-color:#003366;
+    }
+    nav ul li { margin:0 15px; }
+    nav ul li a { color:white; text-decoration:none; font-weight:bold; }
+    nav ul li a:hover { text-decoration:underline; }
+
+    /* Header logo */
+    .header-logos {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 50px; background:#f2f2f2;
+    }
+    .header-logos h1 { flex-grow:1; text-align:center; }
+    .header-logos img { height:60px; }
+
+    /* Sections */
+    section { padding:50px 20px; }
+
+    #home p { text-align:center; font-size:18px; }
+
+    /* Map */
+    #map { width:100%; height:600px; }
+
+    /* Galeri Foto */
+    .hotel-section { margin-bottom:40px; }
+    .hotel-section h3 { text-align:center; margin-bottom:10px; }
+    .hotel-section p { text-align:center; margin-bottom:10px; }
+    .hotel-gallery { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+    .hotel-gallery img { width:250px; height:150px; object-fit:cover; border-radius:5px; }
+
+    /* Kontak */
+    .kontak { max-width:600px; margin:0 auto; line-height:1.8; font-size:18px; text-align:center; }
+    .kontak a { color:#003366; text-decoration:none; font-weight:bold; }
+    .kontak a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#peta">Peta</a></li>
+      <li><a href="#foto">Galeri Foto</a></li>
+      <li><a href="#kontak">Kontak</a></li>
+    </ul>
+  </nav>
+
+  <!-- Header -->
+  <header class="header-logos" id="home">
+    <img src="img/logo_gis.jpg" alt="Logo GIS">
+    <h1>WebGIS Hotel Kabupaten Bandung</h1>
+    <img src="img/logo_mbc.jpg" alt="Logo MBC Tel-U">
+  </header>
+
+  <!-- Home Section -->
+  <section p="home">
+    <p>Selamat datang di WebGIS Bandung! Berikut adalah 10 rekomendasi hotel terbaik di Kabupaten Bandung, mulai dari hotel mewah hingga penginapan nyaman yang strategis. Gunakan peta interaktif untuk melihat lokasi masing-masing hotel secara detail, dan jelajahi galeri foto untuk mendapatkan gambaran fasilitas dan suasana setiap tempat. Dengan informasi lengkap ini, merencanakan perjalanan dan akomodasi Anda di Bandung menjadi lebih mudah dan menyenangkan.</p>
+  </section>
+
+  <!-- Peta Section -->
+<section id="peta">
+  <h2>Peta Hotel Kabupaten Bandung</h2>
+  <div id="map"></div>
+
+  <script>
+    var map = L.map('map').setView([-6.95, 107.6], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var hotels = [
+      {name:"Padma Hotel Bandung", lat:-6.86463, lon:107.60903, photo:"img/padma1.jpg", info:"Hotel bintang 5 dengan pemandangan indah di Ciumbuleuit."},
+      {name:"Hotel Indigo Bandung Dago Pakar", lat:-6.8664185, lon:107.6264732, photo:"img/indigo1.jpg", info:"Hotel mewah dengan desain modern di kawasan Dago."},
+      {name:"InterContinental Bandung Dago Pakar", lat:-6.8667338, lon:107.639731, photo:"img/inter1.jpg", info:"Hotel premium dengan fasilitas lengkap di Dago Pakar."},
+      {name:"Sutanraja Hotel & Convention Centre", lat:-7.0237829, lon:107.5322206, photo:"img/sutanraja3.jpg", info:"Hotel besar untuk acara bisnis dan pertemuan."},
+      {name:"Grand Sunshine Resort & Convention", lat:-7.0249134, lon:107.5258862, photo:"img/sunshine1.jpg", info:"Resor nyaman dengan fasilitas convention di Soreang."},
+      {name:"Green Hill Park Ciwidey", lat:-7.1418108, lon:107.3927093, photo:"img/greenhill2.jpg", info:"Tempat menginap dengan suasana alam Ciwidey yang sejuk."},
+      {name:"Mutiara Hotel Bandung", lat:-6.9121857, lon:107.5264985, photo:"img/mutiara3.jpg", info:"Hotel strategis dekat pusat Kota Bandung."},
+      {name:"Grand Cordela Hotel Bandung", lat:-6.936833, lon:107.6158895, photo:"img/cordela3.jpg", info:"Hotel modern dengan akses mudah ke berbagai lokasi."},
+      {name:"Kancah Nangkub", lat:-7.178489, lon:107.547717, photo:"img/kancah3.jpg", info:"Akomodasi sederhana dengan nuansa pedesaan Bandung Selatan."},
+      {name:"Grand Mercure Bandung Setiabudi", lat:-6.8547428, lon:107.5925411, photo:"img/mercure3.jpg", info:"Hotel elegan dengan fasilitas bintang 5 di Setiabudi."}
+    ];
+
+    hotels.forEach(function(hotel) {
+      var popupContent = `
+        <div style="text-align:center;">
+          <h3>${hotel.name}</h3>
+          <img src="${hotel.photo}" width="200" style="border-radius:5px;"><br>
+          <p>${hotel.info}</p>
+          <p><b>Koordinat:</b> ${hotel.lat}, ${hotel.lon}</p>
+        </div>
+      `;
+      L.marker([hotel.lat, hotel.lon]).addTo(map)
+        .bindPopup(popupContent);
+    });
+  </script>
+</section>
+
+  <!-- Galeri Foto Section -->
+  <section id="foto">
+    <h2>Galeri Foto Hotel di Kabupaten Bandung</h2>
+
+    <!-- Contoh Padma Hotel -->
+    <div class="hotel-section">
+      <h3>Padma Hotel Bandung</h3>
+      <p>Hotel bintang 5 dengan pemandangan indah di Ciumbuleuit.</p>
+      <div class="hotel-gallery">
+        <img src="img/padma1.jpg" alt="Padma 1">
+        <img src="img/padma2.jpg" alt="Padma 2">
+        <img src="img/padma3.jpg" alt="Padma 3">
+      </div>
+    </div>
+
+    <!-- Hotel Indigo -->
+    <div class="hotel-section">
+      <h3>Hotel Indigo Bandung Dago Pakar</h3>
+      <p>Hotel mewah dengan desain modern di kawasan Dago.</p>
+      <div class="hotel-gallery">
+        <img src="img/indigo1.jpg" alt="Indigo 1">
+        <img src="img/indigo2.jpg" alt="Indigo 2">
+        <img src="img/indigo3.jpg" alt="Indigo 3">
+      </div>
+    </div>
+
+    <!-- InterContinental -->
+    <div class="hotel-section">
+      <h3>InterContinental Bandung Dago Pakar</h3>
+      <p>Hotel premium dengan fasilitas lengkap di Dago Pakar.</p>
+      <div class="hotel-gallery">
+        <img src="img/inter1.jpg" alt="Inter 1">
+        <img src="img/inter2.jpg" alt="Inter 2">
+        <img src="img/inter3.jpg" alt="Inter 3">
+      </div>
+    </div>
+
+    <!-- Sutanraja -->
+    <div class="hotel-section">
+      <h3>Sutanraja Hotel & Convention Centre</h3>
+      <p>Hotel besar untuk acara bisnis dan pertemuan.</p>
+      <div class="hotel-gallery">
+        <img src="img/sutanraja1.jpg" alt="Sutanraja 1">
+        <img src="img/sutanraja2.jpg" alt="Sutanraja 2">
+        <img src="img/sutanraja3.jpg" alt="Sutanraja 3">
+      </div>
+    </div>
+
+    <!-- Grand Sunshine -->
+    <div class="hotel-section">
+      <h3>Grand Sunshine Resort & Convention</h3>
+      <p>Resor nyaman dengan fasilitas convention di Soreang.</p>
+      <div class="hotel-gallery">
+        <img src="img/sunshine1.jpg" alt="Sunshine 1">
+        <img src="img/sunshine2.jpg" alt="Sunshine 2">
+        <img src="img/sunshine3.jpg" alt="Sunshine 3">
+      </div>
+    </div>
+
+    <!-- Green Hill -->
+    <div class="hotel-section">
+      <h3>Green Hill Park Ciwidey</h3>
+      <p>Tempat menginap dengan suasana alam Ciwidey yang sejuk.</p>
+      <div class="hotel-gallery">
+        <img src="img/greenhill1.jpg" alt="GreenHill 1">
+        <img src="img/greenhill2.jpg" alt="GreenHill 2">
+        <img src="img/greenhill3.jpg" alt="GreenHill 3">
+      </div>
+    </div>
+
+    <!-- Mutiara Hotel -->
+    <div class="hotel-section">
+      <h3>Mutiara Hotel Bandung</h3>
+      <p>Hotel strategis dekat pusat Kota Bandung.</p>
+      <div class="hotel-gallery">
+        <img src="img/mutiara1.jpg" alt="Mutiara 1">
+        <img src="img/mutiara2.jpg" alt="Mutiara 2">
+        <img src="img/mutiara3.jpg" alt="Mutiara 3">
+      </div>
+    </div>
+
+    <!-- Grand Cordela -->
+    <div class="hotel-section">
+      <h3>Grand Cordela Hotel Bandung</h3>
+      <p>Hotel modern dengan akses mudah ke berbagai lokasi.</p>
+      <div class="hotel-gallery">
+        <img src="img/cordela1.jpg" alt="Cordela 1">
+        <img src="img/cordela2.jpg" alt="Cordela 2">
+        <img src="img/cordela3.jpg" alt="Cordela 3">
+      </div>
+    </div>
+
+    <!-- Kancah Nangkub -->
+    <div class="hotel-section">
+      <h3>Kancah Nangkub</h3>
+      <p>Akomodasi sederhana dengan nuansa pedesaan Bandung Selatan.</p>
+      <div class="hotel-gallery">
+        <img src="img/kancah1.jpg" alt="Kancah 1">
+        <img src="img/kancah2.jpg" alt="Kancah 2">
+        <img src="img/kancah3.jpg" alt="Kancah 3">
+      </div>
+    </div>
+
+    <!-- Grand Mercure -->
+    <div class="hotel-section">
+      <h3>Grand Mercure Bandung Setiabudi</h3>
+      <p>Hotel elegan dengan fasilitas bintang 5 di Setiabudi.</p>
+      <div class="hotel-gallery">
+        <img src="img/mercure1.jpg" alt="Mercure 1">
+        <img src="img/mercure2.jpg" alt="Mercure 2">
+        <img src="img/mercure3.jpg" alt="Mercure 3">
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Kontak Section -->
+  <section id="kontak">
+    <h2>Kontak Pembuat Web</h2>
+    <div class="kontak">
+      <p><b>Nama:</b> Meli Yolan</p>
+      <p><b>Email:</b> yolanmeli5@gmail.com</p>
+      <p><b>Instagram:</b> <a href="https://www.instagram.com/mlyolan" target="_blank">@mlyolan</a></p>
+      <p><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/mlyolan" target="_blank">Meli Yolan</a></p>
+    </div>
+  </section>
+
+</body>
+</html>
